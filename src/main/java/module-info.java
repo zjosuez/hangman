@@ -12,5 +12,6 @@ module org.jogo.da.forca.jogodaforca {
     requires java.sql;
 
     opens org.jogo.da.forca.jogodaforca to javafx.fxml;
+    opens org.jogo.da.forca.jogodaforca.model to javafx.base;
     exports org.jogo.da.forca.jogodaforca;
 }
