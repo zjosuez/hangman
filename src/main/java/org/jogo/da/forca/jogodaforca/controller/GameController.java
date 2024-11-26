@@ -2,20 +2,30 @@ package org.jogo.da.forca.jogodaforca.controller;
 
 import org.jogo.da.forca.jogodaforca.model.database.GameDatabase;
 
+import java.util.*;
+
 public class GameController {
     private GameDatabase database;
     private String palavraAtual;
     private StringBuilder progresso;
     private int erros;
     private final int maxErros = 6;
+    private Set<String> letrasUsadas;
+    private List<String> letrasErradas;
 
     public GameController() {
         database = new GameDatabase();
         erros = 0;
+        letrasUsadas = new HashSet<>();
+        letrasErradas = new ArrayList<>();
     }
 
     public boolean registrarUsuario(String nomeUsuario) {
         return database.inserirUsuario(nomeUsuario);
+    }
+
+    public String getProgresso() {
+        return progresso.toString().trim();
     }
 
     public String iniciarJogo() {
@@ -24,26 +34,37 @@ public class GameController {
             progresso = new StringBuilder("_ ".repeat(palavraAtual.length()));
             return progresso.toString().trim();
         }
-        return null; // Erro ao buscar palavra
+        return null;
     }
 
     public String enviarLetra(String letra) {
         if (palavraAtual == null) return null;
 
+        // Verifica se a letra já foi usada
+        if (letrasUsadas.contains(letra)) {
+            return "Letra já utilizada!";
+        }
+        letrasUsadas.add(letra);
+
         boolean acertou = false;
 
         for (int i = 0; i < palavraAtual.length(); i++) {
             if (palavraAtual.charAt(i) == letra.charAt(0)) {
-                progresso.setCharAt(i * 2, letra.charAt(0)); // Atualiza a posição correta no progresso
+                progresso.setCharAt(i * 2, letra.charAt(0));
                 acertou = true;
             }
         }
 
         if (!acertou) {
             erros++;
+            letrasErradas.add(letra);
         }
 
         return progresso.toString().trim();
+    }
+
+    public List<String> getLetrasErradas() {
+        return letrasErradas;
     }
 
     public boolean verificarVitoria() {
@@ -66,10 +87,13 @@ public class GameController {
         erros = 0;
         palavraAtual = null;
         progresso = null;
+        letrasUsadas.clear();
+        letrasErradas.clear();
     }
 
-    public void atualizarPontuacao(String nomeUsuario, int pontos) {
-        database.atualizarPontuacao(nomeUsuario, pontos);
+    public List<Map.Entry<String, Integer>> buscarRanking() {
+        return database.buscarRanking();
     }
 }
+
 

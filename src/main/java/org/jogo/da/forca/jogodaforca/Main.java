@@ -18,7 +18,7 @@ public class Main extends Application {
         root.setCenter(gameUI.getLayout());
 
         // Configurar a cena e o palco
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 800, 750);
         primaryStage.setTitle("Jogo da Forca");
         primaryStage.setScene(scene);
         primaryStage.show();
