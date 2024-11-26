@@ -4,10 +4,10 @@ import org.jogo.da.forca.jogodaforca.model.database.GameDatabase;
 
 public class GameController {
     private GameDatabase database;
-    private String palavraAtual;       // Palavra a ser adivinhada
-    private StringBuilder progresso;  // Progresso da palavra (_ _ _)
-    private int erros;                // Contador de erros
-    private final int maxErros = 6;   // Limite de erros permitido
+    private String palavraAtual;
+    private StringBuilder progresso;
+    private int erros;
+    private final int maxErros = 6;
 
     public GameController() {
         database = new GameDatabase();
