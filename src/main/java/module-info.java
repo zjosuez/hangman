@@ -8,8 +8,8 @@ module org.jogo.da.forca.jogodaforca {
     requires net.synedra.validatorfx;
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
-    requires eu.hansolo.tilesfx;
     requires com.almasb.fxgl.all;
+    requires java.sql;
 
     opens org.jogo.da.forca.jogodaforca to javafx.fxml;
     exports org.jogo.da.forca.jogodaforca;
