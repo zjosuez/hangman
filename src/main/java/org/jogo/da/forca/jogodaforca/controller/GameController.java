@@ -101,7 +101,6 @@ public class GameController {
         return database.buscarRanking();
     }
 
-    // Atualiza a pontuação do usuário no banco de dados
     private void atualizarPontuacao(String nomeUsuario, int pontos) {
         int pontuacaoAtual = database.buscarPontuacao(nomeUsuario);
         database.atualizarPontuacao(nomeUsuario, pontuacaoAtual + pontos);

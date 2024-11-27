@@ -9,7 +9,6 @@ import java.util.Map;
 public class GameDatabase {
     private static final String URL = "jdbc:sqlite:forca.db";
 
-    // Conexão ao banco de dados
     private Connection connect() {
         try {
             return DriverManager.getConnection(URL);
@@ -19,7 +18,6 @@ public class GameDatabase {
         }
     }
 
-    // Inserir um novo usuário
     public boolean inserirUsuario(String nome) {
         String sql = "INSERT INTO usuario (nome, pontuacao_total) VALUES (?, 0)";
         try (Connection conn = connect();
@@ -33,7 +31,6 @@ public class GameDatabase {
         }
     }
 
-    // Buscar uma palavra aleatória
     public String buscarPalavraAleatoria() {
         String sql = "SELECT texto FROM palavra ORDER BY RANDOM() LIMIT 1";
         try (Connection conn = connect();
@@ -48,7 +45,6 @@ public class GameDatabase {
         return null; // Caso não encontre nenhuma palavra
     }
 
-    // Atualizar pontuação de um usuário
     public boolean atualizarPontuacao(String nome, int pontos) {
         String sql = "UPDATE usuario SET pontuacao_total = pontuacao_total + ? WHERE nome = ?";
         try (Connection conn = connect();
@@ -76,10 +72,9 @@ public class GameDatabase {
         } catch (SQLException e) {
             System.out.println("Erro ao buscar pontuação: " + e.getMessage());
         }
-        return 0; // Caso o usuário não exista, retorna 0
+        return 0;
     }
 
-    // Listar usuários e suas pontuações
     public List<String> listarUsuarios() {
         String sql = "SELECT nome, pontuacao_total FROM usuario ORDER BY pontuacao_total DESC";
         List<String> usuarios = new ArrayList<>();
@@ -95,7 +90,6 @@ public class GameDatabase {
         return usuarios;
     }
 
-    // Buscar ranking dos 10 melhores usuários
     public List<Map.Entry<String, Integer>> buscarRanking() {
         List<Map.Entry<String, Integer>> ranking = new ArrayList<>();
         String sql = "SELECT nome, SUM(pontuacao_total) AS pontuacao_agrupada " +
