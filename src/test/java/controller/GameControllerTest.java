@@ -1,3 +1,5 @@
+package controller;
+
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -6,10 +8,6 @@ import org.jogo.da.forca.jogodaforca.controller.GameDatabaseController;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-
-import java.util.AbstractMap;
-import java.util.List;
-import java.util.Map;
 
 class GameControllerTest {
 
