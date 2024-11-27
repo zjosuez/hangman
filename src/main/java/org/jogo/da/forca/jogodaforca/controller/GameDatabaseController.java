@@ -1,4 +1,4 @@
-package org.jogo.da.forca.jogodaforca.model.database;
+package org.jogo.da.forca.jogodaforca.controller;
 
 import java.sql.*;
 import java.util.AbstractMap;
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class GameDatabase {
+public class GameDatabaseController {
     private static final String URL = "jdbc:sqlite:forca.db";
 
     private Connection connect() {

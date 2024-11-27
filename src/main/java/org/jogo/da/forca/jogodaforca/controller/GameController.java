@@ -1,11 +1,9 @@
 package org.jogo.da.forca.jogodaforca.controller;
 
-import org.jogo.da.forca.jogodaforca.model.database.GameDatabase;
-
 import java.util.*;
 
 public class GameController {
-    private GameDatabase database;
+    private GameDatabaseController database;
     private String palavraAtual;
     private StringBuilder progresso;
     private int erros;
@@ -15,7 +13,7 @@ public class GameController {
     private String nomeUsuario;
 
     public GameController() {
-        database = new GameDatabase();
+        database = new GameDatabaseController();
         erros = 0;
         letrasUsadas = new HashSet<>();
         letrasErradas = new ArrayList<>();
