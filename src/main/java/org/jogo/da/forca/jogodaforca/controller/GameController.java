@@ -3,7 +3,7 @@ package org.jogo.da.forca.jogodaforca.controller;
 import java.util.*;
 
 public class GameController {
-    private GameDatabaseController database;
+    public GameDatabaseController database;
     private String palavraAtual;
     private StringBuilder progresso;
     private int erros;
@@ -99,7 +99,7 @@ public class GameController {
         return database.buscarRanking();
     }
 
-    private void atualizarPontuacao(String nomeUsuario, int pontos) {
+    public void atualizarPontuacao(String nomeUsuario, int pontos) {
         int pontuacaoAtual = database.buscarPontuacao(nomeUsuario);
         database.atualizarPontuacao(nomeUsuario, pontuacaoAtual + pontos);
     }
