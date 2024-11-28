@@ -14,4 +14,5 @@ module org.jogo.da.forca.jogodaforca {
     opens org.jogo.da.forca.jogodaforca to javafx.fxml;
     opens org.jogo.da.forca.jogodaforca.model to javafx.base;
     exports org.jogo.da.forca.jogodaforca;
+    exports org.jogo.da.forca.jogodaforca.controller;
 }

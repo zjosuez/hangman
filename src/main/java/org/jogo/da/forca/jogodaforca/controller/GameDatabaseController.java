@@ -9,7 +9,7 @@ import java.util.Map;
 public class GameDatabaseController {
     private static final String URL = "jdbc:sqlite:forca.db";
 
-    private Connection connect() {
+    public Connection connect() {
         try {
             return DriverManager.getConnection(URL);
         } catch (SQLException e) {
