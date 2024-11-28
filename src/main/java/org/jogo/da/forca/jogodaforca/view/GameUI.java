@@ -1,25 +1,18 @@
 package org.jogo.da.forca.jogodaforca.view;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import org.jogo.da.forca.jogodaforca.controller.GameController;
-import org.jogo.da.forca.jogodaforca.model.Ranking;
-import org.jogo.da.forca.jogodaforca.model.database.GameDatabase;
-
-import java.util.List;
-import java.util.Map;
 
 public class GameUI {
     private BorderPane layout;
@@ -27,57 +20,61 @@ public class GameUI {
     private Label mensagemLabel;
     private TextField letraInput;
     private Canvas canvas;
-    private String nomeUsuario;
-    private StringBuilder progressoPalavra;
-    private GameController gameController = new GameController();
     private Label letrasErradasLabel;
+    private String nomeUsuario;
+    private final GameController gameController;
+    private final GameCanvasDrawer canvasDrawer;
+    private final RankingView rankingView;
 
     public GameUI() {
+        gameController = new GameController();
+        canvas = new Canvas(300, 400);
+        canvasDrawer = new GameCanvasDrawer(canvas);
+        rankingView = new RankingView(gameController);
         layout = new BorderPane();
         criarInterface();
     }
 
     private void criarInterface() {
-        letrasErradasLabel = new Label("Letras erradas: Nenhuma");
-        letrasErradasLabel.setStyle("-fx-font-size: 14px;");
+        layout.setTop(criarPainelSuperior());
+        layout.setCenter(criarPainelCentral());
+        layout.setBottom(criarPainelInferior());
+    }
 
-        // Título
+    private Node criarPainelSuperior() {
         Label tituloLabel = new Label("Jogo da Forca");
         tituloLabel.setStyle("-fx-font-size: 24px; -fx-font-weight: bold;");
 
-        // Botão para exibir ranking
         Button rankingButton = new Button("Mostrar Ranking");
-        rankingButton.setOnAction(e -> mostrarRanking());
+        rankingButton.setOnAction(e -> rankingView.mostrarRanking());
 
-        // Painel superior (título e entrada de usuário)
         VBox topPane = new VBox(tituloLabel, criarPainelUsuario(), rankingButton);
         topPane.setAlignment(Pos.CENTER);
         topPane.setSpacing(10);
-        layout.setTop(topPane);
+        return topPane;
+    }
 
-        // Área central (palavra e canvas para desenho)
+    private Node criarPainelCentral() {
         palavraLabel = new Label("_ _ _ _ _");
         palavraLabel.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
-        palavraLabel.setAlignment(Pos.CENTER);
 
-        canvas = new Canvas(300, 400);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        desenharForca(gc);
+        canvasDrawer.desenharForca();
 
         VBox centerPane = new VBox(canvas, palavraLabel);
         centerPane.setAlignment(Pos.CENTER);
         centerPane.setSpacing(20);
-        layout.setCenter(centerPane);
+        return centerPane;
+    }
 
-        // Painel inferior (entrada de letras e controles)
+    private Node criarPainelInferior() {
         letraInput = new TextField();
         letraInput.setPromptText("Digite uma letra");
         letraInput.setMaxWidth(100);
 
         Button enviarButton = new Button("Enviar");
-        Button reiniciarButton = new Button("Reiniciar");
-
         enviarButton.setOnAction(e -> enviarLetra());
+
+        Button reiniciarButton = new Button("Reiniciar");
         reiniciarButton.setOnAction(e -> reiniciarJogo());
 
         HBox controlsPane = new HBox(letraInput, enviarButton, reiniciarButton);
@@ -85,19 +82,13 @@ public class GameUI {
         controlsPane.setSpacing(10);
 
         mensagemLabel = new Label("Tentativas restantes: 6");
-        mensagemLabel.setStyle("-fx-font-size: 14px;");
+        letrasErradasLabel = new Label("Letras erradas: Nenhuma");
 
         VBox bottomPane = new VBox(controlsPane, mensagemLabel, letrasErradasLabel);
         bottomPane.setAlignment(Pos.CENTER);
         bottomPane.setSpacing(10);
-        layout.setBottom(bottomPane);
+        return bottomPane;
     }
-
-    public BorderPane getLayout() {
-        Scene scene = new Scene(layout, 600, 600);
-        return layout;
-    }
-
 
     private HBox criarPainelUsuario() {
         TextField nomeInput = new TextField();
@@ -110,12 +101,9 @@ public class GameUI {
                 mensagemLabel.setText("Por favor, insira seu nome.");
                 return;
             }
-
             if (gameController.registrarUsuario(nomeUsuario)) {
                 mensagemLabel.setText("Bem-vindo, " + nomeUsuario + "!");
                 iniciarJogo();
-
-                // Desabilitar entrada de nome e botão após início do jogo
                 nomeInput.setDisable(true);
                 iniciarButton.setDisable(true);
             } else {
@@ -128,7 +116,6 @@ public class GameUI {
         userPane.setAlignment(Pos.CENTER);
         return userPane;
     }
-
 
     private void iniciarJogo() {
         String palavraProgresso = gameController.iniciarJogo();
@@ -152,36 +139,28 @@ public class GameUI {
 
         if (resultado.equals("Letra já utilizada!")) {
             mensagemLabel.setText("Você já usou essa letra.");
-            return;
+        } else {
+            palavraLabel.setText(gameController.getProgresso());
+            mensagemLabel.setText("Tentativas restantes: " + (6 - gameController.getErros()));
+            letrasErradasLabel.setText("Letras erradas: " + String.join(", ", gameController.getLetrasErradas()));
+            canvasDrawer.atualizarBoneco(gameController.getErros());
         }
-
-        palavraLabel.setText(gameController.getProgresso());
 
         if (gameController.verificarVitoria()) {
-            mensagemLabel.setText("Parabéns, você venceu!");
-            exibirTelaVitoria(); // Chama a tela de vitória
+            mostrarTelaVitoria();
         } else if (gameController.verificarDerrota()) {
-            mensagemLabel.setText("Você perdeu!");
-            exibirTelaDerrota(gameController.getPalavraAtual()); // Chama a tela de derrota
-        } else {
-            mensagemLabel.setText("Tentativas restantes: " + (6 - gameController.getErros()));
+            mostrarTelaDerrota(gameController.getPalavraAtual());
         }
-
-        // Atualiza as letras erradas
-        letrasErradasLabel.setText("Letras erradas: " + String.join(", ", gameController.getLetrasErradas()));
-
-        atualizarBoneco();
     }
 
 
 
-    private void exibirTelaVitoria() {
+    private void mostrarTelaVitoria() {
         Stage vitoriaStage = new Stage();
         vitoriaStage.setTitle("Vitória!");
 
-        Label mensagem = new Label("Parabéns! Você acertou a palavra e ganhou +10 pontos!");
-        mensagem.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        mensagem.setAlignment(Pos.CENTER);
+        Label mensagemVitoria = new Label("Parabéns, você venceu!");
+        mensagemVitoria.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
         Button jogarNovamenteButton = new Button("Jogar Novamente");
         jogarNovamenteButton.setOnAction(e -> {
@@ -189,133 +168,52 @@ public class GameUI {
             reiniciarJogo();
         });
 
-        VBox layout = new VBox(20, mensagem, jogarNovamenteButton);
+        VBox layout = new VBox(mensagemVitoria, jogarNovamenteButton);
         layout.setAlignment(Pos.CENTER);
+        layout.setSpacing(20);
         layout.setPadding(new Insets(20));
-        Scene scene = new Scene(layout, 500, 250); // Tamanho maior
+
+        Scene scene = new Scene(layout, 400, 200);
         vitoriaStage.setScene(scene);
         vitoriaStage.show();
     }
 
-    private void exibirTelaDerrota(String palavra) {
+
+    private void mostrarTelaDerrota(String palavraCorreta) {
         Stage derrotaStage = new Stage();
         derrotaStage.setTitle("Derrota!");
 
-        // Mensagem de derrota
-        Label mensagem = new Label("Você perdeu! A palavra era: " + palavra);
-        mensagem.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
-        mensagem.setAlignment(Pos.CENTER);
+        Label mensagemDerrota = new Label("Que pena, você perdeu!");
+        mensagemDerrota.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
 
-        // Botão para jogar novamente
+        Label palavraLabel = new Label("A palavra correta era: " + palavraCorreta);
+        palavraLabel.setStyle("-fx-font-size: 16px;");
+
         Button jogarNovamenteButton = new Button("Jogar Novamente");
         jogarNovamenteButton.setOnAction(e -> {
             derrotaStage.close();
-            reiniciarJogo(); // Reinicia o jogo com uma nova palavra
+            reiniciarJogo();
         });
 
-        // Layout da tela de derrota
-        VBox layout = new VBox(20, mensagem, jogarNovamenteButton);
+        VBox layout = new VBox(mensagemDerrota, palavraLabel, jogarNovamenteButton);
         layout.setAlignment(Pos.CENTER);
+        layout.setSpacing(20);
         layout.setPadding(new Insets(20));
 
-        // Configurar e mostrar a mini tela
-        Scene scene = new Scene(layout, 400, 250); // Tamanho maior para melhor visibilidade
+        Scene scene = new Scene(layout, 400, 250);
         derrotaStage.setScene(scene);
         derrotaStage.show();
     }
 
 
-    private void mostrarRanking() {
-        Stage rankingStage = new Stage();
-        rankingStage.setTitle("Ranking - Top 10 Jogadores");
-
-        TableView<Ranking> table = new TableView<>();
-        table.setItems(getRankingData());
-
-        TableColumn<Ranking, String> nomeCol = new TableColumn<>("Nome");
-        nomeCol.setCellValueFactory(new PropertyValueFactory<>("nome"));
-        nomeCol.setPrefWidth(150);
-
-        TableColumn<Ranking, Integer> pontuacaoCol = new TableColumn<>("Pontuação");
-        pontuacaoCol.setCellValueFactory(new PropertyValueFactory<>("pontuacao_total"));
-        pontuacaoCol.setPrefWidth(100);
-
-        table.getColumns().addAll(nomeCol, pontuacaoCol);
-
-        VBox vbox = new VBox(table);
-        vbox.setAlignment(Pos.CENTER);
-        vbox.setPadding(new Insets(10));
-
-        Scene scene = new Scene(vbox, 300, 400);
-        rankingStage.setScene(scene);
-        rankingStage.show();
-    }
-
-    private ObservableList<Ranking> getRankingData() {
-        ObservableList<Ranking> data = FXCollections.observableArrayList();
-        List<Map.Entry<String, Integer>> ranking = gameController.buscarRanking();
-        for (Map.Entry<String, Integer> entry : ranking) {
-            data.add(new Ranking(entry.getKey(), entry.getValue()));
-        }
-        return data;
-    }
-
     private void reiniciarJogo() {
         gameController.reiniciarJogo();
         iniciarJogo();
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
-        desenharForca(gc);
+        canvasDrawer.desenharForca();
         mensagemLabel.setText("Tentativas restantes: 6");
     }
 
-    private void atualizarBoneco() {
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        switch (gameController.getErros()) {
-            case 1 -> desenharCabeca(gc);
-            case 2 -> desenharCorpo(gc);
-            case 3 -> desenharBracoEsquerdo(gc);
-            case 4 -> desenharBracoDireito(gc);
-            case 5 -> desenharPernaEsquerda(gc);
-            case 6 -> desenharPernaDireita(gc);
-        }
-    }
-
-    // Desenho da forca e do boneco
-    private void desenharForca(GraphicsContext gc) {
-        gc.setStroke(Color.BLACK);
-        gc.setLineWidth(2);
-
-        // Base, pilar, topo e corda
-        gc.strokeLine(50, 350, 250, 350);
-        gc.strokeLine(150, 350, 150, 50);
-        gc.strokeLine(150, 50, 220, 50);
-        gc.strokeLine(220, 50, 220, 100);
-    }
-
-    private void desenharCabeca(GraphicsContext gc) {
-        gc.strokeOval(200, 100, 40, 40);
-    }
-
-    private void desenharCorpo(GraphicsContext gc) {
-        gc.strokeLine(220, 140, 220, 240);
-    }
-
-    private void desenharBracoEsquerdo(GraphicsContext gc) {
-        gc.strokeLine(220, 160, 190, 200);
-    }
-
-    private void desenharBracoDireito(GraphicsContext gc) {
-        gc.strokeLine(220, 160, 250, 200);
-    }
-
-    private void desenharPernaEsquerda(GraphicsContext gc) {
-        gc.strokeLine(220, 240, 190, 300);
-    }
-
-    private void desenharPernaDireita(GraphicsContext gc) {
-        gc.strokeLine(220, 240, 250, 300);
+    public BorderPane getLayout() {
+        return layout;
     }
 }
-
-

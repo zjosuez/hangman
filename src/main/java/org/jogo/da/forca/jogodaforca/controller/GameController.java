@@ -1,26 +1,26 @@
 package org.jogo.da.forca.jogodaforca.controller;
 
-import org.jogo.da.forca.jogodaforca.model.database.GameDatabase;
-
 import java.util.*;
 
 public class GameController {
-    private GameDatabase database;
+    private GameDatabaseController database;
     private String palavraAtual;
     private StringBuilder progresso;
     private int erros;
     private final int maxErros = 6;
     private Set<String> letrasUsadas;
     private List<String> letrasErradas;
+    private String nomeUsuario;
 
     public GameController() {
-        database = new GameDatabase();
+        database = new GameDatabaseController();
         erros = 0;
         letrasUsadas = new HashSet<>();
         letrasErradas = new ArrayList<>();
     }
 
     public boolean registrarUsuario(String nomeUsuario) {
+        this.nomeUsuario = nomeUsuario;
         return database.inserirUsuario(nomeUsuario);
     }
 
@@ -68,7 +68,11 @@ public class GameController {
     }
 
     public boolean verificarVitoria() {
-        return progresso.toString().replace(" ", "").equalsIgnoreCase(palavraAtual);
+        if (progresso.toString().replace(" ", "").equalsIgnoreCase(palavraAtual)) {
+            atualizarPontuacao(nomeUsuario, 10); // Adiciona 10 pontos para cada vitória
+            return true;
+        }
+        return false;
     }
 
     public boolean verificarDerrota() {
@@ -94,6 +98,12 @@ public class GameController {
     public List<Map.Entry<String, Integer>> buscarRanking() {
         return database.buscarRanking();
     }
+
+    private void atualizarPontuacao(String nomeUsuario, int pontos) {
+        int pontuacaoAtual = database.buscarPontuacao(nomeUsuario);
+        database.atualizarPontuacao(nomeUsuario, pontuacaoAtual + pontos);
+    }
 }
+
 
 
