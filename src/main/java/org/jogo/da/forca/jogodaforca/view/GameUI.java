@@ -208,10 +208,13 @@ public class GameUI {
 
     private void reiniciarJogo() {
         gameController.reiniciarJogo();
-        iniciarJogo();
+        canvasDrawer.limparCanvas();
         canvasDrawer.desenharForca();
+        iniciarJogo();
         mensagemLabel.setText("Tentativas restantes: 6");
+        letrasErradasLabel.setText("Letras erradas: Nenhuma");
     }
+
 
     public BorderPane getLayout() {
         return layout;

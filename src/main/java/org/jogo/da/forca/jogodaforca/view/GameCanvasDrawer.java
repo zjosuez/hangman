@@ -34,6 +34,12 @@ public class GameCanvasDrawer {
         }
     }
 
+    public void limparCanvas() {
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+    }
+
+
     private void desenharCabeca(GraphicsContext gc) {
         gc.strokeOval(200, 100, 40, 40);
     }
